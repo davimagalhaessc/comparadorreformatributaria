@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comparador de Regimes Tributários – CBS/IBS</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+:root{--ink:#1b2430;--mut:#5d6877;--bg:#eef0ec;--card:#fff;--line:#d9ddd5;--win:#0b7a5a;--lr:#4f46e5;--lp:#0284c7;--sh:#d97706;--sp:#0d9488}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "IBM Plex Sans",system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+header{background:var(--ink);color:#fff;padding:18px 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
+h1{margin:0;font-size:21px;font-weight:600}header p{margin:2px 0 0;color:#b9c2cf;font-size:13px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-weight:500;border:0;border-radius:6px;padding:8px 14px;cursor:pointer;background:#fff;color:var(--ink)}
+button.p{background:var(--win);color:#fff}button:hover{opacity:.9}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #38bdf8;outline-offset:2px}
+main{max-width:1280px;margin:0 auto;padding:20px 16px 40px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+h2{margin:0 0 12px;font-size:16px}
+summary{cursor:pointer;font-weight:600;font-size:16px}
+#inputs,#inputs2{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:14px;margin-top:14px}
+fieldset{border:1px solid var(--line);border-radius:6px;margin:0;padding:10px 12px;display:grid;gap:8px;align-content:start}
+legend{font-weight:600;padding:0 6px}
+label{display:grid;grid-template-columns:1fr 125px;gap:8px;align-items:center;font-size:13px}
+input,select{font:inherit;padding:5px 7px;border:1px solid var(--line);border-radius:4px;width:100%;text-align:right;background:#fbfbf9}
+.calc-box{background:#f4f6f2;border:1px dashed #bcc3b6;border-radius:5px;padding:8px 10px;font-size:12px;color:var(--ink);display:grid;gap:4px}
+.calc-box div{display:flex;justify-content:space-between}
+.note{font-size:12px;color:var(--mut)}
+.alert{padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:8px}.warn{background:#fdecea;color:#8a1c12}.info{background:#e8f1fb;color:#134a7c}.success{background:#e6f3ee;color:var(--win)}
+#cards,#cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.rc{border-top:5px solid var(--c);position:relative}
+.rc.win{box-shadow:0 0 0 2px var(--win)}
+.rc h3{margin:0;font-size:15px}.rc .big{font-size:26px;font-weight:700;margin:6px 0 0}
+.rc dl{margin:10px 0 0;display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13px}.rc dt{color:var(--mut)}.rc dd{margin:0;text-align:right;font-weight:500}
+.badge{display:inline-block;margin-top:8px;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;background:#e6f3ee;color:var(--win)}.badge.x{background:#f3f3f0;color:var(--mut)}.badge.n{background:#fdecea;color:#8a1c12}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.cv{position:relative;height:300px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:5px 9px;border-bottom:1px solid #eceee8;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{background:var(--ink);color:#fff}
+tr.sec td{background:#e7eae3;font-weight:600;text-align:left}
+tr.b td{font-weight:700}
+td.w{background:#e9f5f0}
+.tabs{display:flex;gap:4px}.tabs button{background:#dfe3da;border-radius:6px 6px 0 0;padding:10px 18px}.tabs button.on,.seg button.on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:6px}.seg button{border-radius:0}
+.co{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.co label{grid-template-columns:1fr;gap:3px}.co input{text-align:left}
+.alq-box{background:#fff8e6;border:1px solid #f0d28a;border-radius:6px;padding:10px 12px;font-size:12.5px;margin-top:10px;display:grid;gap:5px}
+.alq-box .row{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-bottom:1px dashed #f0e0b0}
+.alq-box .row:last-child{border-bottom:none}
+.alq-box .row b{color:#8a5a00}
+.alq-box .tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;font-weight:600}
+.tag-red{background:#d1fae5;color:#065f46}.tag-full{background:#fef3c7;color:#92400e}
+.tag-trans{background:#dbeafe;color:#1e40af}
+@media print{header .btns,.noprint,.tabs{display:none!important}header{background:#fff;color:var(--ink);padding:0 0 10px}header p{color:var(--mut)}body{background:#fff}main{padding:0}.card{break-inside:avoid}.charts{grid-template-columns:1fr 1fr}.cv{height:240px}@page{margin:12mm}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Comparador de Regimes Tributários</h1>
+    <p>Lucro Real · Lucro Presumido · Simples Nacional Híbrido · Simples Nacional Puro — com CBS/IBS</p>
+  </div>
+  <div class="btns">
+    <button class="p" onclick="printPdf()">Imprimir / salvar PDF</button>
+    <button class="p" onclick="exportXlsx()">Exportar Excel</button>
+    <button onclick="resetAll()">Restaurar padrão</button>
+  </div>
+</header>
+<main>
+  <section class="card co">
+    <label><span>CNPJ (Consulta Automática API)</span><div style="display:flex;gap:6px;"><input id="cnpj" type="text" placeholder="00.000.000/0000-00" maxlength="18" inputmode="numeric"><button onclick="consultarCnpj()" style="background:var(--ink);color:#fff;padding:5px 10px;font-size:12px;">Buscar</button></div></label>
+    <label><span>Empresa (razão social)</span><input id="emp" type="text" placeholder="Nome da empresa"></label>
+    <label><span>CNAE Principal</span><input id="cnae" type="text" placeholder="Ex: 5611-2/01" style="text-align:left"></label>
+  </section>
+
+  <div id="cnae-alert"></div>
+  <div id="api-alert"></div>
+
+  <section class="card">
+    <div class="seg" id="per">
+      <button data-p="1" onclick="setPer(1)">Mensal (média)</button>
+      <button data-p="3" class="on" onclick="setPer(3)">Trimestral</button>
+      <button data-p="12" onclick="setPer(12)">Anual</button>
+    </div> <b>&nbsp;Período dos valores informados</b>
+    <p class="note">IRPJ e CSLL são sempre apurados em base trimestral. Valores mensais são convertidos ×3 e anuais ÷4. As alíquotas de CBS e IBS consideram os regimes diferenciados da reforma tributária mapeados pelo CNAE consultado.</p>
+  </section>
+
+  <section class="card">
+    <div class="seg" id="ano">
+      <button data-y="2027" class="on" onclick="setAno(2027)">2027/2028</button>
+      <button data-y="2029" onclick="setAno(2029)">2029</button>
+      <button data-y="2030" onclick="setAno(2030)">2030</button>
+      <button data-y="2031" onclick="setAno(2031)">2031</button>
+      <button data-y="2032" onclick="setAno(2032)">2032</button>
+      <button data-y="2033" onclick="setAno(2033)">2033+</button>
+    </div> <b>&nbsp;Ano da simulação (cronograma de transição do IBS)</b>
+    <p class="note" id="ano-note"></p>
+  </section>
+
+  <nav class="tabs noprint">
+    <button id="b0" class="on" onclick="showTab(0)">Comparativo completo</button>
+    <button id="b1" onclick="showTab(1)">Simples: Puro × Híbrido</button>
+  </nav>
+
+  <div id="t1" style="display:grid;gap:16px">
+    <details class="card" open>
+      <summary>Dados do cliente e premissas (edite e o resultado atualiza automaticamente)</summary>
+      <div id="inputs"></div>
+      <p class="note">CBS e IBS incidem sobre a base líquida de créditos. O sistema aplica reduções setoriais de IBS/CBS baseadas no CNAE (ex: Saúde, Educação, Restaurantes -60%; Profissionais Regulamentados -30%). No Simples, as alíquotas efetivas seguem a LC 123/2006. Vendas com ST têm a parcela de ICMS excluída do DAS.</p>
+    </details>
+    <div id="alerts"></div>
+    <section id="cards"></section>
+    <section class="charts">
+      <div class="card"><h2>Composição da carga tributária (<span class="pn">trimestre</span>)</h2><div class="cv"><canvas id="c1"></canvas></div></div>
+      <div class="card"><h2>Carga tributária total (% da receita)</h2><div class="cv"><canvas id="c2"></canvas></div></div>
+      <div class="card"><h2>Resultado após tributos (<span class="pn">trimestre</span>)</h2><div class="cv"><canvas id="c3"></canvas></div></div>
+    </section>
+    <section class="card">
+      <h2>Alíquotas efetivas de CBS / IBS aplicadas</h2>
+      <div id="alq-box"></div>
+    </section>
+    <section class="card"><h2>Memória de cálculo</h2><div class="tw"><table id="tb"></table></div>
+      <p class="note">Resultado após tributos = Receita bruta − Tributos totais. Regimes inelegíveis (receita anual acima de R$ 4,8 milhões no Simples) não entram no ranking. A parcela de ICMS do Anexo I do Simples é excluída da base de cálculo do DAS sobre vendas com ST.</p>
+    </section>
+  </div>
+
+  <div id="t2" style="display:none;gap:16px">
+    <section class="card"><h2>Simples Nacional: Puro × Híbrido</h2>
+      <div class="seg">
+        <button id="m1" class="on" onclick="setFr(1)">Com Fator R (considera a folha)</button>
+        <button id="m0" onclick="setFr(0)">Sem Fator R (ignora a folha)</button>
+      </div>
+      <div id="inputs2"></div>
+    </section>
+    <div id="alerts2"></div>
+    <section id="cards2"></section>
+    <section class="card">
+      <h2>Alíquotas efetivas de CBS / IBS aplicadas</h2>
+      <div id="alq-box2"></div>
+    </section>
+    <section class="charts">
+      <div class="card"><h2>Composição da carga (<span class="pn">trimestre</span>)</h2><div class="cv"><canvas id="c4"></canvas></div></div>
+      <div class="card"><h2>Resultado após tributos (<span class="pn">trimestre</span>)</h2><div class="cv"><canvas id="c5"></canvas></div></div>
+    </section>
+    <section class="card"><h2>Memória de cálculo</h2><div class="tw"><table id="tb2"></table></div><p class="note" id="n2"></p></section>
+  </div>
+</main>
+
+<script>
+const NAMES=['Lucro Real','Lucro Presumido','Simples Híbrido','Simples Puro'],RG=['lr','lp','sh','sp'],COL=['#4f46e5','#0284c7','#d97706','#0d9488'];
+const GROUPS=['Operações do período informado','Impostos e encargos','Lucro Presumido','Simples Nacional (Automático)'];
+
+const TAB_SN = {
+  I: [
+    [180000, 0.0400, 0,      0.0000, 0.0000, 0.3400],
+    [360000, 0.0730, 5940,   0.0000, 0.0000, 0.3400],
+    [720000, 0.0950, 13860,  0.0276, 0.1274, 0.3350],
+    [1800000,0.1070, 22500,  0.0276, 0.1274, 0.3350],
+    [3600000,0.1430, 87300,  0.0276, 0.1274, 0.3350],
+    [4800000,0.1900, 378000, 0.0613, 0.2827, 0.0000]
+  ],
+  III: [
+    [180000, 0.0600, 0,      0.0000, 0.0000, 0.3350],
+    [360000, 0.1120, 9360,   0.0000, 0.0000, 0.3200],
+    [720000, 0.1350, 17640,  0.0276, 0.1274, 0.3250],
+    [1800000,0.1600, 35640,  0.0276, 0.1274, 0.3250],
+    [3600000,0.2100, 125640, 0.0276, 0.1274, 0.3350],
+    [4800000,0.3300, 648000, 0.0613, 0.2827, 0.0000]
+  ],
+  V: [
+    [180000, 0.1550, 0,      0.0000, 0.0000, 0.1400],
+    [360000, 0.1800, 4500,   0.0000, 0.0000, 0.1700],
+    [720000, 0.1950, 9900,   0.0296, 0.1364, 0.1900],
+    [1800000,0.2050, 17100,  0.0296, 0.1364, 0.2100],
+    [3600000,0.2300, 62100,  0.0296, 0.1364, 0.2350],
+    [4800000,0.3050, 540000, 0.0613, 0.2827, 0.0000]
+  ]
+};
+
+const IBS_CRONO = {
+  2027: {fator: null, fixo: 0.0010, rotulo: '2027/2028: IBS 0,10% (fase de teste)'},
+  2029: {fator: 0.10,   fixo: null,  rotulo: '2029: IBS 10% da alíquota final'},
+  2030: {fator: 0.20,   fixo: null,  rotulo: '2030: IBS 20% da alíquota final'},
+  2031: {fator: 0.30,   fixo: null,  rotulo: '2031: IBS 30% da alíquota final'},
+  2032: {fator: 0.40,   fixo: null,  rotulo: '2032: IBS 40% da alíquota final'},
+  2033: {fator: 1.00,   fixo: null,  rotulo: '2033+: IBS 100% (regime pleno)'}
+};
+
+function calcAliqSN(anexo, rbt12, isHibrido, acimaSublimite) {
+  const r = Math.max(1, rbt12);
+  const faixa = TAB_SN[anexo].find(f => r <= f[0]) || TAB_SN[anexo][5];
+  const [lim, aliqNom, ded, pPis, pCof, pIcmsIss] = faixa;
+  const efetivaBase = Math.max(0, (r * aliqNom - ded) / r);
+  let fatorReducao = 0;
+  if (isHibrido) fatorReducao += (pPis + pCof);
+  if (acimaSublimite && pIcmsIss > 0) fatorReducao += pIcmsIss;
+  const efetiva = efetivaBase * (1 - fatorReducao);
+  const icmsIssEmbutido = (!acimaSublimite && pIcmsIss > 0) ? efetivaBase * pIcmsIss : 0;
+  return { efetiva, icmsIssEmbutido, efetivaBase, pIcmsIss, pPis, pCof };
+}
+
+const INPUTS=[
+  ['vsst','Venda sem ST',49200,'m',0],
+  ['vcst','Venda com ST',192000,'m',0],
+  ['serv','Serviços',759000,'m',0],
+  ['csst','Compras sem ST',26100,'m',0],
+  ['ccst','Compras com ST',76800,'m',0],
+  ['desp','Despesas operacionais',400000,'m',0],
+  ['folha','Folha de pagamento',203000,'m',0],
+
+  ['icms','ICMS (fora do DAS / LP / LR)',.18,'p',1],
+  ['iss','ISS (fora do DAS / LP / LR)',.05,'p',1],
+  ['cbs','CBS (base)',.1135,'p',1],
+  ['ibs','IBS (alíquota final de referência)',.177,'p',1],
+  ['excl','Excluir ICMS/ISS da base CBS/IBS?',1,'s',1],
+  ['fgts','FGTS',.07,'p',1],
+  ['inss','INSS patronal (Real/Presumido)',.264,'p',1],
+  ['csll','CSLL',.09,'p',1],
+  ['irpj','IRPJ',.15,'p',1],
+  ['adic','Adicional de IR',.10,'p',1],
+  ['lim','Limite adicional IR (trimestre)',60000,'m',1],
+
+  ['lpIrCom','Presunção IRPJ – comércio',.08,'p',2],
+  ['lpIrServ','Presunção IRPJ – serviços',.32,'p',2],
+  ['lpCsCom','Presunção CSLL – comércio',.12,'p',2],
+  ['lpCsServ','Presunção CSLL – serviços',.32,'p',2],
+
+  ['rbt12','RBT12 (Receita acumulada 12 meses)',4000800,'m',3],
+  ['inssSn','INSS patronal (Simples)',0,'p',3]
+];
+
+const ROWS=[
+  ['h','Receita'],
+  ['rec','Receita bruta','m','[vsst]+[vcst]+[serv]',1],
+  ['h','Tributos indiretos'],
+  ['bcIcms','Base ICMS (venda s/ ST − compra s/ ST)','m','[vsst]-[csst]'],
+  ['icms','ICMS (por fora)','m',['{bcIcms}*[icms]','{bcIcms}*[icms]','{bcIcms}*[icms]*[fora]','{bcIcms}*[icms]*[fora]']],
+  ['iss','ISS (por fora)','m',['[serv]*[iss]','[serv]*[iss]','[serv]*[iss]*[fora]','[serv]*[iss]*[fora]']],
+  ['bcCbs','Base CBS/IBS (após créditos)','m',['{rec}-[csst]-[ccst]-[desp]-[excl]*({icms}+{iss})','{rec}-[csst]-[ccst]-[desp]-[excl]*({icms}+{iss})','{rec}-[csst]-[ccst]-[desp]-[excl]*({icms}+{iss})','0']],
+  ['cbs','CBS (com redutor CNAE)','m','{bcCbs}*[cbsRed]'],
+  ['ibs','IBS (com redutor e fator de transição)','m','{bcCbs}*[ibsRed]'],
+  ['h','IRPJ / CSLL / Simples'],
+  ['bcIrpj','Base IRPJ','m',['MAX(0,{rec}-[csst]-[ccst]-[desp]-{icms}-{iss}-{cbs}-{ibs})','([vsst]+[vcst])*[lpIrCom]+[serv]*[lpIrServ]','0','0']],
+  ['bcCsll','Base CSLL','m',['{bcIrpj}','([vsst]+[vcst])*[lpCsCom]+[serv]*[lpCsServ]','0','0']],
+  ['irpj','IRPJ','m','{bcIrpj}*[irpj]'],
+  ['adic','Adicional de IR','m','MAX(0,{bcIrpj}-[lim])*[adic]'],
+  ['csll','CSLL','m','{bcCsll}*[csll]'],
+  ['dasVsst','DAS s/ venda sem ST e serviços','m',['0','0','[vsst]*[shCom]+[serv]*[shServ]','[vsst]*[spCom]+[serv]*[spServ]']],
+  ['dasVcst','DAS s/ venda com ST (sem ICMS)','m',['0','0','[vcst]*[shComSemICMS]','[vcst]*[spComSemICMS]']],
+  ['das','Simples Nacional (DAS)','m','{dasVsst}+{dasVcst}'],
+  ['sub','Subtotal tributos','m','{icms}+{iss}+{cbs}+{ibs}+{irpj}+{adic}+{csll}+{das}',1],
+  ['h','Previdenciário'],
+  ['fgts','FGTS','m','[folha]*[fgts]'],
+  ['inss','INSS patronal','m',['[folha]*[inss]','[folha]*[inss]','[folha]*[inssSn]','[folha]*[inssSn]']],
+  ['prev','Total previdenciário','m','{fgts}+{inss}',1],
+  ['h','Resultado'],
+  ['tot','Total de tributos','m','{sub}+{prev}',1],
+  ['totp','Carga tributária total (% da receita)','p','{rec}>0?{tot}/{rec}:0',1],
+  ['liq','Resultado após tributos','m','{rec}-{tot}',1],
+  ['liqp','Resultado após tributos (%)','p','{rec}>0?{liq}/{rec}:0'],
+  ['h','Valores mensais'],
+  ['mrec','Receita bruta mensal','m','{rec}/3'],
+  ['mtrib','Tributos fiscais mensais','m','{sub}/3'],
+  ['mprev','Tributos previdenciários mensais','m','{prev}/3'],
+  ['mtot','Total de tributos mensal','m','{tot}/3',1],
+  ['mliq','Resultado após tributos mensal','m','{liq}/3',1]
+];
+
+const I={},R={},FN={};
+const js=e=>e.replace(/\{(\w+)\}/g,'R.$1').replace(/\[(\w+)\]/g,'I.$1').replace(/MAX\(/g,'Math.max(');
+ROWS.forEach(r=>{if(r[0]=='h')return;const f=Array.isArray(r[3])?r[3]:[r[3],r[3],r[3],r[3]];r.F=f;FN[r[0]]=f.map(x=>new Function('R','I','return '+js(x)))});
+const fm=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fp=v=>(v*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const $=s=>document.querySelector(s);
+
+let best=0,elig=[1,1,1,1],charts=[],charts2=[],tab=0,rbtManual=false,cnaeReducao=0,cnaeDescricao='',anoSim=2027;
+const S={fr:1},P={per:3},MK='vsst,vcst,serv,csst,ccst,desp,folha'.split(','),MON=new Set(['mrec','mtrib','mprev','mtot','mliq']);
+const kk=()=>P.per/3,dv=(id,v)=>MON.has(id)?v:v*kk(),PL=()=>({1:'mês – média',3:'trimestre',12:'ano'}[P.per]);
+const SK="vsst,vcst,serv,csst,ccst,desp,icms,iss,cbs,ibs,excl,rbt12,folha,fgts,inssSn".split(","),FRK="folha,fgts,inssSn".split(",");
+const simplePred=d=>SK.includes(d[0])&&(S.fr?true:!FRK.includes(d[0]));
+
+function avaliarReducaoCnae(cnaeStr) {
+  if(!cnaeStr) return {fator: 0, desc: 'Nenhum CNAE informado (Alíquota padrão)', categoria: 'Padrão'};
+  const limpo = cnaeStr.replace(/\D/g, '');
+  if(limpo.startsWith('86') || limpo.startsWith('87')) {
+    return {fator: 0.60, desc: 'Saúde / Atividades de Atenção à Saúde (Redução de 60% em IBS e CBS)', categoria: 'Saúde'};
+  }
+  if(limpo.startsWith('85')) {
+    return {fator: 0.60, desc: 'Instituição de Ensino / Educação (Redução de 60% em IBS e CBS)', categoria: 'Educação'};
+  }
+  if(limpo.startsWith('561') || limpo.startsWith('551') || limpo.startsWith('79')) {
+    return {fator: 0.60, desc: 'Alimentação / Hotelaria / Turismo (Redução setorial de 60%)', categoria: 'Alimentação/Turismo'};
+  }
+  if(limpo.startsWith('69') || limpo.startsWith('71') || limpo.startsWith('70') || limpo.startsWith('74')) {
+    return {fator: 0.30, desc: 'Serviços Profissionais Regulamentados (Redução de 30% em IBS e CBS)', categoria: 'Serv. Profissionais'};
+  }
+  return {fator: 0, desc: 'Atividade sem redução específica (Alíquota padrão de IBS e CBS)', categoria: 'Padrão'};
+}
+
+function extrairCnae(data) {
+  const candidatos = [];
+  if (data?.estabelecimento?.atividade_principal) {
+    const ap = data.estabelecimento.atividade_principal;
+    if (typeof ap === 'object' && ap.codigo) candidatos.push(ap.codigo);
+    else if (typeof ap === 'string') candidatos.push(ap);
+  }
+  if (data?.estabelecimento?.cnae_fiscal) candidatos.push(data.estabelecimento.cnae_fiscal);
+  if (data?.estabelecimento?.atividade_principal_id) candidatos.push(data.estabelecimento.atividade_principal_id);
+  if (data?.cnae_fiscal) candidatos.push(data.cnae_fiscal);
+  if (data?.atividade_principal?.[0]?.code) candidatos.push(data.atividade_principal[0].code);
+  if (data?.atividade_principal?.[0]?.codigo) candidatos.push(data.atividade_principal[0].codigo);
+  if (data?.cnae_principal) candidatos.push(data.cnae_principal);
+
+  if (!candidatos.length && data) {
+    const stack = [data];
+    while (stack.length) {
+      const cur = stack.pop();
+      if (!cur || typeof cur !== 'object') continue;
+      for (const k of Object.keys(cur)) {
+        const v = cur[k];
+        if (typeof v === 'string' && /^\d{7}$/.test(v.replace(/\D/g,'')) && /^\d{2}/.test(v)) {
+          candidatos.push(v);
+        } else if (typeof v === 'object' && v !== null) {
+          stack.push(v);
+        }
+      }
+    }
+  }
+
+  const raw = candidatos.find(c => c);
+  if (!raw) return '';
+  const digitos = String(raw).replace(/\D/g, '').padStart(7, '0').slice(0, 7);
+  if (digitos.length !== 7) return '';
+  return digitos.slice(0,4) + '-' + digitos.slice(4,5) + '/' + digitos.slice(5);
+}
+
+// ---- Consulta com 3 Fallbacks e Cabeçalhos ajustados ----
+async function consultarCnpj() {
+  const rawCnpj = $('#cnpj').value.replace(/\D/g,'');
+  const alertBox = $('#api-alert');
+  alertBox.innerHTML = '';
+
+  if(rawCnpj.length !== 14) {
+    alertBox.innerHTML = '<div class="alert warn">Por favor, digite um CNPJ válido com 14 dígitos.</div>';
+    return;
+  }
+
+  const btn = document.querySelector('button[onclick="consultarCnpj()"]');
+  const textoOriginal = btn.textContent;
+  btn.textContent = 'Buscando...';
+  btn.disabled = true;
+
+  let data = null;
+  let origem = '';
+
+  // Cabeçalho para evitar bloqueio de User-Agent
+  const headers = { 'Accept': 'application/json' };
+
+  // 1ª tentativa: minhareceita.org
+  try {
+    const res = await fetch(`https://minhareceita.org/${rawCnpj}`, { headers });
+    if (res.ok) {
+      data = await res.json();
+      origem = 'minhareceita.org';
+    }
+  } catch (err) {
+    console.warn('Falha na minhareceita.org:', err);
+  }
+
+  // 2ª tentativa: BrasilAPI
+  if (!data) {
+    try {
+      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${rawCnpj}`, { headers });
+      if (res.ok) {
+        data = await res.json();
+        origem = 'BrasilAPI';
+      }
+    } catch (err) {
+      console.warn('Falha na BrasilAPI:', err);
+    }
+  }
+
+  // 3ª tentativa: CNPJ.ws (Fallback extra)
+  if (!data) {
+    try {
+      const res = await fetch(`https://publica.cnpj.ws/cnpj/${rawCnpj}`, { headers });
+      if (res.ok) {
+        const json = await res.json();
+        // Adaptando a resposta do CNPJ.ws para o formato esperado
+        data = {
+          razao_social: json.razao_social,
+          nome: json.razao_social,
+          estabelecimento: {
+            atividade_principal: { codigo: json.estabelecimento?.atividade_principal?.subclasse || json.cnae_principal }
+          },
+          cnae_fiscal: json.estabelecimento?.atividade_principal?.subclasse || json.cnae_principal
+        };
+        origem = 'CNPJ.ws';
+      }
+    } catch (err) {
+      console.warn('Falha na CNPJ.ws:', err);
+    }
+  }
+
+  // Se todas falharam
+  if (!data) {
+    alertBox.innerHTML = '<div class="alert warn"><b>Erro ao consultar CNPJ:</b> O serviço de consulta está indisponível ou o CNPJ não foi encontrado. Verifique o número digitado e tente novamente.</div>';
+    btn.textContent = textoOriginal;
+    btn.disabled = false;
+    return;
+  }
+
+  // Sucesso: preenche os campos
+  try {
+    const razao = data.razao_social || data.nome || data.estabelecimento?.nome_fantasia || '';
+    if (razao) $('#emp').value = razao;
+
+    const cnaeFormatado = extrairCnae(data);
+    console.log('CNAE extraído:', cnaeFormatado, '| Origem:', origem, '| Resposta:', data);
+
+    if (cnaeFormatado) {
+      $('#cnae').value = cnaeFormatado;
+      aplicarCnaeRegime(cnaeFormatado);
+    } else {
+      $('#cnae').value = '';
+      alertBox.innerHTML = '<div class="alert warn"><b>CNPJ localizado, mas o CNAE não pôde ser identificado automaticamente.</b> Preencha manualmente.</div>';
+    }
+
+    if (origem) {
+      alertBox.innerHTML += `<div class="alert info">Consulta realizada via <b>${origem}</b>.</div>`;
+    }
+    refresh();
+  } catch (parseErr) {
+    console.error('Erro ao processar dados:', parseErr);
+    alertBox.innerHTML = '<div class="alert warn">Erro ao processar os dados retornados. Tente novamente.</div>';
+  } finally {
+    btn.textContent = textoOriginal;
+    btn.disabled = false;
+  }
+}
+
+function aplicarCnaeRegime(cnaeVal) {
+  const analise = avaliarReducaoCnae(cnaeVal);
+  cnaeReducao = analise.fator;
+  cnaeDescricao = analise.desc;
+
+  const box = $('#cnae-alert');
+  if(cnaeReducao > 0) {
+    box.innerHTML = `<div class="alert success"><b>Regime Diferenciado Identificado:</b> ${cnaeDescricao}. Alíquota de CBS/IBS reduzida em ${(cnaeReducao*100).toFixed(0)}%.</div>`;
+  } else {
+    box.innerHTML = `<div class="alert info"><b>Enquadramento:</b> ${cnaeDescricao}.</div>`;
+  }
+}
+
+$('#cnae').oninput = e => {
+  aplicarCnaeRegime(e.target.value);
+  refresh();
+};
+
+function ibsDoAno() {
+  const c = IBS_CRONO[anoSim] || IBS_CRONO[2027];
+  let nominalAno;
+  if (c.fixo != null) nominalAno = c.fixo;
+  else nominalAno = I.ibs * c.fator;
+  const efetiva = nominalAno * (1 - cnaeReducao);
+  return { nominalAno, efetiva, fixo: c.fixo, fator: c.fator };
+}
+
+function buildCalcContext(useFatorR){
+  const q=3/P.per, o={...I};
+  MK.forEach(k=>o[k]=I[k]*q);
+  const recTrim = o.vsst + o.vcst + o.serv;
+  const ann = recTrim * 4;
+  const baseRbt = rbtManual ? I.rbt12 : ann;
+  const acimaSub = (ann > 3.6e6 || baseRbt > 3.6e6) ? 1 : 0;
+  o.fora = acimaSub;
+  const ratio = recTrim > 0 ? o.folha / recTrim : 0;
+  const anexoServ = (!useFatorR || ratio >= 0.28) ? 'III' : 'V';
+
+  o.cbsRed = I.cbs * (1 - cnaeReducao);
+  const ibsInfo = ibsDoAno();
+  o.ibsNominalAno = ibsInfo.nominalAno;
+  o.ibsRed = ibsInfo.efetiva;
+
+  const qSHCom  = calcAliqSN('I', baseRbt, true, acimaSub);
+  const qSPCom  = calcAliqSN('I', baseRbt, false, acimaSub);
+  const qSHServ = calcAliqSN(anexoServ, baseRbt, true, acimaSub);
+  const qSPServ = calcAliqSN(anexoServ, baseRbt, false, acimaSub);
+
+  o.shCom  = qSHCom.efetiva;
+  o.spCom  = qSPCom.efetiva;
+  o.shServ = qSHServ.efetiva;
+  o.spServ = qSPServ.efetiva;
+
+  o.shComSemICMS = Math.max(0, qSHCom.efetiva  - qSHCom.icmsIssEmbutido);
+  o.spComSemICMS = Math.max(0, qSPCom.efetiva  - qSPCom.icmsIssEmbutido);
+
+  o._meta  = {
+    ann, baseRbt, ratio, anexoServ, acimaSub,
+    icmsComHib:  qSHCom.icmsIssEmbutido,
+    icmsComPuro: qSPCom.icmsIssEmbutido,
+    ibsNominalAno: ibsInfo.nominalAno,
+    ibsFixo: ibsInfo.fixo,
+    ibsFator: ibsInfo.fator,
+    ano: anoSim
+  };
+  return o;
+}
+
+function setAno(ano){
+  anoSim = ano;
+  document.querySelectorAll('#ano button').forEach(b=>b.classList.toggle('on',+b.dataset.y===ano));
+  const c = IBS_CRONO[ano];
+  $('#ano-note').textContent = c.rotulo + (ano >= 2029 && ano <= 2032 ? '. O IBS da simulação é a alíquota final × ' + (c.fator*100).toFixed(0) + '%.' : '') + ' CBS já é cobrado normalmente desde 2027.';
+  buildAll();
+  refresh();
+}
+
+function resetAll(){
+  rbtManual = false;
+  cnaeReducao = 0;
+  cnaeDescricao = '';
+  anoSim = 2027;
+  $('#cnae').value = '';
+  $('#emp').value = '';
+  $('#cnpj').value = '';
+  $('#cnae-alert').innerHTML = '';
+  $('#api-alert').innerHTML = '';
+  INPUTS.forEach(d=>{ I[d[0]] = 0; });
+  document.querySelectorAll('#ano button').forEach(b=>b.classList.toggle('on',+b.dataset.y===2027));
+  $('#ano-note').textContent = IBS_CRONO[2027].rotulo + ' CBS já é cobrado normalmente desde 2027.';
+  buildAll();
+  refresh();
+}
+
+function syncRbt(){
+  if(rbtManual) return;
+  const q=3/P.per;
+  I.rbt12 = Math.round(((I.vsst+I.vcst+I.serv)*q*4)*100)/100;
+  const el1 = $('#inputs input[data-k="rbt12"]'), el2 = $('#inputs2 input[data-k="rbt12"]');
+  if(el1) el1.value = I.rbt12;
+  if(el2) el2.value = I.rbt12;
+}
+
+function setPer(n){
+  const f=n/P.per;
+  MK.forEach(k=>I[k]=Math.round(I[k]*f*100)/100);
+  P.per=n;
+  document.querySelectorAll('#per button').forEach(b=>b.classList.toggle('on',+b.dataset.p==n));
+  document.querySelectorAll('.pn').forEach(e=>e.textContent=PL());
+  buildAll();
+  refresh();
+}
+
+function refresh(){tab?renderSimple():render()}
+function buildAll(){buildInputs($('#inputs'),d=>d[4]<4);buildInputs($('#inputs2'),simplePred)}
+
+function buildInputs(box,pred){
+  box.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const ds=INPUTS.filter(d=>d[4]==gi&&pred(d));if(!ds.length)return;
+    const fs=document.createElement('fieldset');fs.innerHTML='<legend>'+g+'</legend>';
+    ds.forEach(([k,l,v,t])=>{
+      const lab=document.createElement('label');lab.innerHTML='<span>'+l+'</span>';let el;
+      if(t=='s'){el=document.createElement('select');el.innerHTML='<option value="1">Sim</option><option value="0">Não</option>';el.value=I[k]}
+      else{el=document.createElement('input');el.type='number';el.step='any';el.dataset.k=k;el.value=t=='p'?+(I[k]*100).toFixed(4):I[k]}
+      el.oninput=()=>{
+        const n=parseFloat(el.value)||0;
+        I[k]=t=='p'?n/100:t=='s'?+el.value:n;
+        if(k==='rbt12') rbtManual = true;
+        if(['vsst','vcst','serv'].includes(k)) syncRbt();
+        refresh();
+      };
+      lab.append(el);fs.append(lab)});
+    if(gi===3){
+      const infoBox=document.createElement('div');
+      infoBox.className='calc-box sn-preview';
+      fs.append(infoBox);
+    }
+    box.append(fs)});
+  updateSnPreviews();
+}
+
+function updateSnPreviews(){
+  const ctx = buildCalcContext(tab===0 ? true : !!S.fr);
+  const m = ctx._meta;
+  const html = `
+    <div><span>Enquadramento Serviços:</span><b>Anexo ${m.anexoServ}</b></div>
+    <div><span>ICMS / ISS no DAS:</span><b>${m.acimaSub ? 'Por fora (> R$ 3,6M)' : 'Dentro do DAS'}</b></div>
+    <div><span>Alíq. Efetiva Comércio (Puro / Híb.):</span><b>${fp(ctx.spCom)} / ${fp(ctx.shCom)}</b></div>
+    <div><span>Com. s/ ST (Puro / Híb.):</span><b>${fp(ctx.spComSemICMS)} / ${fp(ctx.shComSemICMS)}</b></div>
+    <div><span>Alíq. Efetiva Serviços (Puro / Híb.):</span><b>${fp(ctx.spServ)} / ${fp(ctx.shServ)}</b></div>
+  `;
+  document.querySelectorAll('.sn-preview').forEach(el=>el.innerHTML=html);
+}
+
+function renderAliquotas(){
+  const Q = buildCalcContext(true);
+  const cbsNom = I.cbs, cbsEf = Q.cbsRed;
+  const ibsInfo = ibsDoAno();
+  const redPct = cnaeReducao * 100;
+  const tagCbs = cnaeReducao > 0
+      ? `<span class="tag tag-red">Redutor ${redPct.toFixed(0)}% aplicado</span>`
+      : `<span class="tag tag-full">Sem redutor (alíquota cheia)</span>`;
+  const tagIbs = cnaeReducao > 0
+      ? `<span class="tag tag-red">Redutor ${redPct.toFixed(0)}% aplicado</span>`
+      : `<span class="tag tag-full">Sem redutor (alíquota cheia)</span>`;
+  const cat = cnaeDescricao || 'Padrão';
+  const anoLbl = (anoSim === 2027 ? '2027/2028' : String(anoSim));
+  const fatorTxt = ibsInfo.fixo != null
+      ? `Fixo em ${fp(ibsInfo.fixo)} (fase de teste)`
+      : `${fp(ibsInfo.fator)} da alíquota final`;
+
+  const html = `
+    <div class="alq-box">
+      <div class="row"><span><b>CNAE:</b> ${$('#cnae').value || '(não informado)'}</span><span class="tag tag-trans">Ano ${anoLbl}</span></div>
+      <div class="row"><span>Enquadramento</span><b>${cat}</b></div>
+      <div class="row"><span>CBS nominal (base)</span><b>${fp(cbsNom)}</b></div>
+      <div class="row"><span>CBS efetiva aplicada</span><b>${fp(cbsEf)}</b> ${tagCbs}</div>
+      <div class="row"><span>IBS alíquota final de referência</span><b>${fp(I.ibs)}</b></div>
+      <div class="row"><span>IBS nominal do ano (${anoLbl})</span><b>${fp(ibsInfo.nominalAno)}</b> <i class="note" style="font-style:normal">${fatorTxt}</i></div>
+      <div class="row"><span>IBS efetiva aplicada</span><b>${fp(ibsInfo.efetiva)}</b> ${tagIbs}</div>
+      <div class="row"><span>CBS + IBS efetivas (total)</span><b>${fp(cbsEf + ibsInfo.efetiva)}</b></div>
+      <div class="row"><span>Redução aplicada (CNAE)</span><b>${cnaeReducao > 0 ? redPct.toFixed(0)+'%' : '—'}</b></div>
+    </div>
+    <p class="note">CBS: alíquota nominal × (1 − redutor CNAE). IBS: alíquota do ano conforme cronograma de transição, também multiplicada por (1 − redutor CNAE). Em 2027/2028 o IBS é fixo em 0,10%; de 2029 a 2032 entra progressivamente (10%, 20%, 30%, 40%); a partir de 2033 atinge 100% da alíquota final de referência.</p>
+  `;
+  $('#alq-box').innerHTML = html;
+}
+
+function calc(){
+  RG.forEach(g=>R[g]={});
+  const Q=buildCalcContext(true);
+  ROWS.forEach(r=>{if(r[0]=='h')return;RG.forEach((g,j)=>R[g][r[0]]=FN[r[0]][j](R[g],Q))});
+  const ann=Q._meta.ann;
+  elig=[1,1,ann<=4.8e6?1:0,ann<=4.8e6?1:0];
+  best=-1;RG.forEach((g,j)=>{if(elig[j]&&(best<0||R[g].tot<R[RG[best]].tot))best=j});
+  return Q;
+}
+
+function render(){
+  const Q=calc();
+  updateSnPreviews();
+  renderAliquotas();
+  const {ann, ratio, anexoServ, acimaSub, ibsNominalAno, ano} = Q._meta;
+  const anoLbl = (ano === 2027 ? '2027/2028' : String(ano));
+  let a='';
+  if(ann>4.8e6) a+='<div class="alert warn">Receita anualizada de '+fm(ann)+' ultrapassa R$ 4,8 milhões: Simples Nacional (Híbrido e Puro) inelegível.</div>';
+  else if(acimaSub) a+='<div class="alert info">Receita anualizada / RBT12 acima do sublimite de R$ 3.600.000,00: ICMS e ISS expurgados do DAS e calculados por fora.</div>';
+  else a+='<div class="alert info">Faturamento até R$ 3,6 milhões: ICMS e ISS já embutidos no DAS do Simples (Puro e Híbrido). Fator R atual: '+fp(ratio)+' (Anexo '+anexoServ+' para serviços). Vendas com ST têm a parcela de ICMS excluída do DAS.</div>';
+  a+='<div class="alert info"><b>Ano simulado: '+anoLbl+'</b> — IBS nominal de '+fp(ibsNominalAno)+' (cronograma de transição) '+ (cnaeReducao > 0 ? 'com redutor CNAE de '+(cnaeReducao*100).toFixed(0)+'%' : 'sem redutor CNAE') +'. CBS cobrada normalmente.</div>';
+  $('#alerts').innerHTML=a;
+
+  $('#cards').innerHTML=RG.map((g,j)=>{
+    const r=R[g],w=j==best,d=(r.tot-R[RG[best]].tot)*4;
+    const b=!elig[j]?'<span class="badge n">Inelegível</span>':w?'<span class="badge">Mais vantajoso</span>':'<span class="badge x">+ '+fm(d)+'/ano vs. melhor</span>';
+    const cbsTag = r.cbs > 0 ? fp(Q.cbsRed) : '—';
+    const ibsTag = r.ibs > 0 ? fp(Q.ibsRed) : '—';
+    return '<div class="card rc'+(w?' win':'')+'" style="--c:'+COL[j]+'"><h3>'+NAMES[j]+'</h3><div class="big">'+fm(r.tot*kk())+'</div>'+b+
+    '<dl><dt>Carga total</dt><dd>'+fp(r.totp)+'</dd><dt>Tributos fiscais</dt><dd>'+fm(r.sub*kk())+'</dd><dt>Previdenciário</dt><dd>'+fm(r.prev*kk())+'</dd><dt>Total mensal</dt><dd>'+fm(r.mtot)+'</dd><dt>Resultado após tributos</dt><dd>'+fm(r.liq*kk())+'</dd><dt>CBS efetiva</dt><dd>'+cbsTag+'</dd><dt>IBS efetiva ('+anoLbl+')</dt><dd>'+ibsTag+'</dd></dl></div>'}).join('');
+
+  let h='<thead><tr><th>Item ('+PL()+')</th>'+NAMES.map(n=>'<th>'+n+'</th>').join('')+'</tr></thead><tbody>';
+  ROWS.forEach(r=>{
+    if(r[0]=='h'){h+='<tr class="sec"><td colspan="5">'+r[1]+'</td></tr>';return}
+    h+='<tr'+(r[4]?' class="b"':'')+'><td>'+r[1]+'</td>'+RG.map((g,j)=>'<td'+(j==best?' class="w"':'')+'>'+(r[2]=='p'?fp(R[g][r[0]]):fm(dv(r[0],R[g][r[0]])))+'</td>').join('')+'</tr>'});
+  h+='<tr class="sec"><td colspan="5">Alíquotas efetivas CBS / IBS aplicadas — ano '+anoLbl+'</td></tr>';
+  h+='<tr><td>CBS efetiva (nominal '+fp(I.cbs)+')</td>'+RG.map((g,j)=>'<td>'+((R[g].cbs>0||R[g].bcCbs>0)?fp(Q.cbsRed):'—')+'</td>').join('')+'</tr>';
+  h+='<tr><td>IBS nominal do ano ('+anoLbl+')</td>'+RG.map(()=>'<td>'+fp(ibsNominalAno)+'</td>').join('')+'</tr>';
+  h+='<tr><td>IBS efetiva (com redutor CNAE)</td>'+RG.map((g,j)=>'<td>'+((R[g].ibs>0||R[g].bcCbs>0)?fp(Q.ibsRed):'—')+'</td>').join('')+'</tr>';
+  h+='<tr><td>Redutor setorial (CNAE)</td>'+RG.map(()=>'<td>'+(cnaeReducao>0?(cnaeReducao*100).toFixed(0)+'%':'—')+'</td>').join('')+'</tr>';
+  h+='<tr class="sec"><td colspan="5">Alíquotas efetivas do Simples (Anexo I / Serviços)</td></tr>';
+  h+='<tr><td>Anexo I – alíquota cheia (Puro / Híb.)</td><td>—</td><td>—</td><td>'+fp(Q.shCom)+'</td><td>'+fp(Q.spCom)+'</td></tr>';
+  h+='<tr><td>Anexo I – s/ parcela ICMS (venda com ST)</td><td>—</td><td>—</td><td>'+fp(Q.shComSemICMS)+'</td><td>'+fp(Q.spComSemICMS)+'</td></tr>';
+  h+='<tr><td>Anexo '+anexoServ+' – serviços (Puro / Híb.)</td><td>—</td><td>—</td><td>'+fp(Q.shServ)+'</td><td>'+fp(Q.spServ)+'</td></tr>';
+  $('#tb').innerHTML=h+'</tbody>';
+  drawCharts();
+}
+
+function drawCharts(){
+  const comp=[['ICMS',g=>R[g].icms,'#64748b'],['ISS',g=>R[g].iss,'#94a3b8'],['CBS + IBS',g=>R[g].cbs+R[g].ibs,'#0284c7'],['IRPJ',g=>R[g].irpj+R[g].adic,'#4f46e5'],['CSLL',g=>R[g].csll,'#7c3aed'],['Simples (DAS)',g=>R[g].das,'#d97706'],['FGTS + INSS',g=>R[g].prev,'#be123c']];
+  const D1={labels:NAMES,datasets:comp.map(c=>({label:c[0],data:RG.map(g=>c[1](g)*kk()),backgroundColor:c[2]}))};
+  const D2={labels:NAMES,datasets:[{data:RG.map(g=>+(R[g].totp*100).toFixed(2)),backgroundColor:COL.map((c,j)=>j==best?c:c+'80')}]};
+  const D3={labels:NAMES,datasets:[{data:RG.map(g=>R[g].liq*kk()),backgroundColor:COL.map((c,j)=>j==best?c:c+'80')}]};
+  const money=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
+  const base=(t,leg,fmt)=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:leg,position:'bottom'},tooltip:{callbacks:{label:c=>(c.dataset.label?c.dataset.label+': ':'')+fmt(c.parsed.y)}}},scales:{x:{stacked:t=='s'},y:{stacked:t=='s',beginAtZero:true,ticks:{callback:fmt}}}});
+  const cfg=[['c1',D1,base('s',true,money)],['c2',D2,base('n',false,v=>v+'%')],['c3',D3,base('n',false,money)]];
+  if(!charts.length)cfg.forEach(([id,d,o])=>charts.push(new Chart($('#'+id),{type:'bar',data:d,options:o})));
+  else cfg.forEach(([id,d,o],i)=>{charts[i].data=d;charts[i].update()});
+}
+
+const SN=['Simples Puro','Simples Híbrido'],SK2=['sp','sh'],SC=[COL[3],COL[2]];
+function showTab(i){tab=i;$('#t1').style.display=i?'none':'grid';$('#t2').style.display=i?'grid':'none';$('#b0').classList.toggle('on',!i);$('#b1').classList.toggle('on',!!i);buildAll();refresh();[...charts,...charts2].forEach(c=>c.resize())}
+function setFr(v){S.fr=v;$('#m1').classList.toggle('on',!!v);$('#m0').classList.toggle('on',!v);buildInputs($('#inputs2'),simplePred);renderSimple()}
+
+function runSimple(Iv){
+  if(!S.fr) Iv.folha = 0;
+  const o={sh:{},sp:{}};
+  ROWS.forEach(r=>{if(r[0]=='h')return;[2,3].forEach(j=>o[RG[j]][r[0]]=FN[r[0]][j](o[RG[j]],Iv))});
+  return o;
+}
+
+function renderAliquotasSimples(Iv){
+  const cbsNom = I.cbs, cbsEf = Iv.cbsRed;
+  const ibsInfo = ibsDoAno();
+  const redPct = cnaeReducao * 100;
+  const tag = cnaeReducao > 0
+      ? `<span class="tag tag-red">Redutor ${redPct.toFixed(0)}% aplicado</span>`
+      : `<span class="tag tag-full">Sem redutor (alíquota cheia)</span>`;
+  const anoLbl = (anoSim === 2027 ? '2027/2028' : String(anoSim));
+  const fatorTxt = ibsInfo.fixo != null
+      ? `Fixo em ${fp(ibsInfo.fixo)} (fase de teste)`
+      : `${fp(ibsInfo.fator)} da alíquota final`;
+  const html = `
+    <div class="alq-box">
+      <div class="row"><span><b>CNAE:</b> ${$('#cnae').value || '(não informado)'}</span><span class="tag tag-trans">Ano ${anoLbl}</span></div>
+      <div class="row"><span>Enquadramento</span><b>${cnaeDescricao || 'Padrão'}</b></div>
+      <div class="row"><span>CBS nominal</span><b>${fp(cbsNom)}</b></div>
+      <div class="row"><span>CBS efetiva aplicada</span><b>${fp(cbsEf)}</b> ${tag}</div>
+      <div class="row"><span>IBS alíquota final de referência</span><b>${fp(I.ibs)}</b></div>
+      <div class="row"><span>IBS nominal do ano (${anoLbl})</span><b>${fp(ibsInfo.nominalAno)}</b> <i class="note" style="font-style:normal">${fatorTxt}</i></div>
+      <div class="row"><span>IBS efetiva aplicada</span><b>${fp(ibsInfo.efetiva)}</b> ${tag}</div>
+      <div class="row"><span>CBS + IBS efetivas (total)</span><b>${fp(cbsEf + ibsInfo.efetiva)}</b></div>
+      <div class="row"><span>Redução aplicada (CNAE)</span><b>${cnaeReducao > 0 ? redPct.toFixed(0)+'%' : '—'}</b></div>
+    </div>
+    <p class="note">No Simples, CBS e IBS não são recolhidos em separado (o DAS unifica os tributos); a coluna mostra a alíquota que seria aplicada caso o regime fosse o regular. O redutor CNAE e o cronograma do IBS são os mesmos do comparativo completo.</p>
+  `;
+  $('#alq-box2').innerHTML = html;
+}
+
+function renderSimple(){
+  const Iv=buildCalcContext(!!S.fr), T=runSimple(Iv);
+  updateSnPreviews();
+  renderAliquotasSimples(Iv);
+  const {ann, ratio, anexoServ, acimaSub, ibsNominalAno, ano}=Iv._meta;
+  const anoLbl = (ano === 2027 ? '2027/2028' : String(ano));
+  const w=T.sp.tot<=T.sh.tot?0:1;
+  let a='';
+  if(ann>4.8e6) a+='<div class="alert warn">Receita anualizada de '+fm(ann)+' ultrapassa R$ 4,8 milhões: Simples Nacional inelegível.</div>';
+  a+=S.fr
+    ?'<div class="alert info">Com Fator R ('+fp(ratio)+'): serviços enquadrados no <b>Anexo '+anexoServ+'</b>. ICMS/ISS '+(acimaSub?'cobrados por fora (> R$ 3,6M).':'embutidos no DAS (≤ R$ 3,6M). Vendas com ST sem parcela de ICMS no DAS.')+'</div>'
+    :'<div class="alert info">Sem Fator R: folha e encargos desprezados; serviços tributados no <b>Anexo III</b>. ICMS/ISS '+(acimaSub?'cobrados por fora (> R$ 3,6M).':'embutidos no DAS (≤ R$ 3,6M). Vendas com ST sem parcela de ICMS no DAS.')+'</div>';
+  a+='<div class="alert info"><b>Ano simulado: '+anoLbl+'</b> — IBS nominal de '+fp(ibsNominalAno)+' (cronograma de transição) '+ (cnaeReducao > 0 ? 'com redutor CNAE de '+(cnaeReducao*100).toFixed(0)+'%' : 'sem redutor CNAE') +'. CBS cobrada normalmente.</div>';
+  $('#alerts2').innerHTML=a;
+
+  $('#cards2').innerHTML=SK2.map((g,i)=>{const r=T[g],d=(r.tot-T[SK2[w]].tot)*4;
+    const b=i==w?'<span class="badge">Mais vantajoso</span>':'<span class="badge x">+ '+fm(d)+'/ano vs. melhor</span>';
+    return '<div class="card rc'+(i==w?' win':'')+'" style="--c:'+SC[i]+'"><h3>'+SN[i]+'</h3><div class="big">'+fm(r.tot*kk())+'</div>'+b+'<dl><dt>Carga total</dt><dd>'+fp(r.totp)+'</dd><dt>Tributos fiscais</dt><dd>'+fm(r.sub*kk())+'</dd>'+(S.fr?'<dt>Previdenciário</dt><dd>'+fm(r.prev*kk())+'</dd>':'')+'<dt>Total mensal</dt><dd>'+fm(r.mtot)+'</dd><dt>Resultado após tributos</dt><dd>'+fm(r.liq*kk())+'</dd><dt>CBS efetiva</dt><dd>'+(r.cbs>0?fp(Iv.cbsRed):'—')+'</dd><dt>IBS efetiva ('+anoLbl+')</dt><dd>'+(r.ibs>0?fp(Iv.ibsRed):'—')+'</dd></dl></div>'}).join('');
+
+  const ids=['rec','icms','iss','cbs','ibs','dasVsst','dasVcst','das','sub'].concat(S.fr?['fgts','inss','prev']:[],['tot','totp','liq','liqp','mtot']);
+  let h='<thead><tr><th>Item ('+PL()+')</th><th>'+SN[0]+'</th><th>'+SN[1]+'</th></tr></thead><tbody>';
+  ids.forEach(id=>{const r=ROWS.find(x=>x[0]==id);h+='<tr'+(r[4]?' class="b"':'')+'><td>'+r[1]+'</td>'+SK2.map((g,i)=>'<td'+(i==w?' class="w"':'')+'>'+(r[2]=='p'?fp(T[g][id]):fm(dv(id,T[g][id])))+'</td>').join('')+'</tr>'});
+  h+='<tr class="sec"><td colspan="3">Alíquotas efetivas CBS / IBS aplicadas — ano '+anoLbl+'</td></tr>';
+  h+='<tr><td>CBS efetiva (nominal '+fp(I.cbs)+')</td>'+SK2.map(()=>'<td>'+(T.sh.cbs>0||T.sh.bcCbs>0?fp(Iv.cbsRed):'—')+'</td>').join('')+'</tr>';
+  h+='<tr><td>IBS nominal do ano ('+anoLbl+')</td>'+SK2.map(()=>'<td>'+fp(ibsNominalAno)+'</td>').join('')+'</tr>';
+  h+='<tr><td>IBS efetiva (com redutor CNAE)</td>'+SK2.map(()=>'<td>'+(T.sh.ibs>0||T.sh.bcCbs>0?fp(Iv.ibsRed):'—')+'</td>').join('')+'</tr>';
+  h+='<tr><td>Redutor setorial (CNAE)</td>'+SK2.map(()=>'<td>'+(cnaeReducao>0?(cnaeReducao*100).toFixed(0)+'%':'—')+'</td>').join('')+'</tr>';
+  h+='<tr class="sec"><td colspan="3">Alíquotas do Simples (Anexo I / Serviços)</td></tr>';
+  h+='<tr><td>Anexo I – alíquota cheia (Puro / Híb.)</td><td>'+fp(Iv.spCom)+'</td><td>'+fp(Iv.shCom)+'</td></tr>';
+  h+='<tr><td>Anexo I – s/ parcela ICMS (venda com ST)</td><td>'+fp(Iv.spComSemICMS)+'</td><td>'+fp(Iv.shComSemICMS)+'</td></tr>';
+  h+='<tr><td>Anexo '+anexoServ+' – serviços (Puro / Híb.)</td><td>'+fp(Iv.spServ)+'</td><td>'+fp(Iv.shServ)+'</td></tr>';
+  $('#tb2').innerHTML=h+'</tbody>';
+  $('#n2').textContent=S.fr?'Fator R calculado com folha ÷ receita do período informado. Alíquotas do Simples calculadas automaticamente pela RBT12. A parcela de ICMS do Anexo I é excluída da base da venda com ST.':'Folha de pagamento desprezada neste modo. A parcela de ICMS do Anexo I é excluída da base da venda com ST.';
+
+  const comp=[['ICMS','icms','#64748b'],['ISS','iss','#94a3b8'],['CBS','cbs','#0284c7'],['IBS','ibs','#38bdf8'],['Simples (DAS)','das','#d97706'],['FGTS + INSS','prev','#be123c']];
+  const m=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
+  const o=st=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:st,position:'bottom'}},scales:{x:{stacked:st},y:{stacked:st,beginAtZero:true,ticks:{callback:m}}}});
+  const D=[{labels:SN,datasets:comp.map(c=>({label:c[0],data:SK2.map(g=>T[g][c[1]]*kk()),backgroundColor:c[2]}))},{labels:SN,datasets:[{data:SK2.map(g=>T[g].liq*kk()),backgroundColor:SC.map((c,i)=>i==w?c:c+'80')}]}];
+  if(!charts2.length){charts2.push(new Chart($('#c4'),{type:'bar',data:D[0],options:o(true)}),new Chart($('#c5'),{type:'bar',data:D[1],options:o(false)}))}
+  else charts2.forEach((c,i)=>{c.data=D[i];c.update()});
+  return T;
+}
+
+$('#cnpj').oninput=e=>{const d=e.target.value.replace(/\D/g,'').slice(0,14);e.target.value=d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2')};
+function printPdf(){const t=document.title;document.title='Comparativo de Regimes Tributários'+($('#emp').value?' – '+$('#emp').value:'');window.print();document.title=t}
+
+async function exportXlsx(){
+  const wb=new ExcelJS.Workbook(),bold={bold:true},hdr={type:'pattern',pattern:'solid',fgColor:{argb:'FF1B2430'}},white={bold:true,color:{argb:'FFFFFFFF'}};
+  const emp=$('#emp').value||'(não informada)',cnpj=$('#cnpj').value||'(não informado)';
+  const Q=calc(), Iv=buildCalcContext(!!S.fr), T=runSimple(Iv);
+  const anoLbl = (anoSim === 2027 ? '2027/2028' : String(anoSim));
+  const ibsInfo = ibsDoAno();
+
+  const aq=wb.addWorksheet('Aliquotas_CBS_IBS');
+  aq.columns=[{width:46},{width:22},{width:52}];
+  const hrA=aq.addRow(['Item','Valor','Observação']);hrA.font=white;hrA.fill=hdr;
+  const redTxt = cnaeReducao > 0 ? (cnaeReducao*100).toFixed(0)+'% (redutor setorial)' : 'Sem redutor (alíquota cheia)';
+  aq.addRow(['CNPJ',cnpj,'']);
+  aq.addRow(['Empresa',emp,'']);
+  aq.addRow(['CNAE',$('#cnae').value||'(não informado)','']);
+  aq.addRow(['Enquadramento',cnaeDescricao||'Padrão','']);
+  aq.addRow(['Redutor setorial CNAE',redTxt,'']);
+  aq.addRow(['Ano da simulação',anoLbl,IBS_CRONO[anoSim].rotulo]).getCell(1).font=bold;
+  aq.addRow([]);
+  aq.addRow(['CBS nominal',I.cbs,'Alíquota base antes do redutor']).getCell(2).numFmt='0.00%';
+  aq.addRow(['CBS efetiva aplicada',Q.cbsRed,'CBS nominal × (1 − redutor)']).getCell(2).numFmt='0.00%';
+  aq.addRow(['IBS alíquota final de referência',I.ibs,'Valor de regime pleno (2033+)']).getCell(2).numFmt='0.00%';
+  aq.addRow(['IBS nominal do ano ('+anoLbl+')',ibsInfo.nominalAno,ibsInfo.fixo!=null?'Fixo em fase de teste':(ibsInfo.fator*100).toFixed(0)+'% da alíquota final']).getCell(2).numFmt='0.00%';
+  aq.addRow(['IBS efetiva aplicada',ibsInfo.efetiva,'IBS nominal do ano × (1 − redutor CNAE)']).getCell(2).numFmt='0.00%';
+  aq.addRow(['CBS + IBS efetivas (total)',Q.cbsRed+ibsInfo.efetiva,'Soma das alíquotas efetivas']).getCell(2).numFmt='0.00%';
+  aq.addRow([]);
+  aq.addRow(['--- Simples Nacional ---','','']).font=bold;
+  aq.addRow(['Anexo I – alíquota cheia (Híbrido)',Q.shCom,'Aplicada sobre vsst + serv']).getCell(2).numFmt='0.00%';
+  aq.addRow(['Anexo I – alíquota cheia (Puro)',Q.spCom,'Aplicada sobre vsst + serv']).getCell(2).numFmt='0.00%';
+  aq.addRow(['Anexo I – sem ICMS (Híbrido)',Q.shComSemICMS,'Aplicada sobre vcst (ST)']).getCell(2).numFmt='0.00%';
+  aq.addRow(['Anexo I – sem ICMS (Puro)',Q.spComSemICMS,'Aplicada sobre vcst (ST)']).getCell(2).numFmt='0.00%';
+  aq.addRow(['Anexo '+Q._meta.anexoServ+' – serviços (Híbrido)',Q.shServ,'Aplicada sobre serv']).getCell(2).numFmt='0.00%';
+  aq.addRow(['Anexo '+Q._meta.anexoServ+' – serviços (Puro)',Q.spServ,'Aplicada sobre serv']).getCell(2).numFmt='0.00%';
+
+  const EXPORT_PREMS = [
+    ...INPUTS,
+    ['cbsRed','CBS efetiva (com redutor CNAE)',0,'p'],
+    ['ibsNominalAno','IBS nominal do ano (cronograma)',0,'p'],
+    ['ibsRed','IBS efetiva (com redutor CNAE e cronograma)',0,'p'],
+    ['shCom','Híbrido: Anexo I – alíquota cheia (calculada)',0,'p'],
+    ['shComSemICMS','Híbrido: Anexo I – sem ICMS/ST (calculada)',0,'p'],
+    ['shServ','Híbrido: serviços – alíquota efetiva (calculada)',0,'p'],
+    ['spCom','Puro: Anexo I – alíquota cheia (calculada)',0,'p'],
+    ['spComSemICMS','Puro: Anexo I – sem ICMS/ST (calculada)',0,'p'],
+    ['spServ','Puro: serviços – alíquota efetiva (calculada)',0,'p'],
+    ['fora','ICMS/ISS recolhidos fora do DAS (> R$ 3,6M)',0,'s']
+  ];
+
+  const prem=(title,V)=>{
+    const p=wb.addWorksheet(title);p.columns=[{width:58},{width:20}];
+    p.addRow(['Empresa',emp]).font=bold;p.addRow(['CNPJ',cnpj]).font=bold;
+    p.addRow(['Ano simulado',anoLbl]).font=bold;p.addRow([]);
+    const h=p.addRow(['Premissas em base TRIMESTRAL (informado em: '+PL()+'); azul = editável; 1 = Sim, 0 = Não','Valor']);h.font=white;h.fill=hdr;
+    const ref={};
+    EXPORT_PREMS.forEach(([k,l,v,t],i)=>{
+      const c=p.addRow([l,V[k]]).getCell(2);
+      c.numFmt=t=='p'?'0.00%':t=='s'?'0':'#,##0.00';
+      c.font={color:{argb:'FF0000FF'}};
+      ref[k]=title+'!$B$'+(i+6);
+    });
+    return ref;
+  };
+
+  const calcSheet=(title,idx,ref,res,note)=>{
+    const s=wb.addWorksheet(title);s.columns=[{width:52},...idx.map(()=>({width:20}))];
+    const hr=s.addRow(['Item (trimestre) – '+emp+' – CNPJ '+cnpj+' – Ano '+anoLbl,...idx.map(j=>NAMES[j])]);hr.font=white;hr.fill=hdr;
+    const rowOf={};let n=2;ROWS.forEach(r=>{if(r[0]!='h')rowOf[r[0]]=n;n++});
+    const L='BCDE';
+    ROWS.forEach(r=>{
+      if(r[0]=='h'){const x=s.addRow([r[1]]);x.font=bold;x.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE7EAE3'}};return}
+      const x=s.addRow([r[1]]);
+      idx.forEach((j,k)=>{
+        const f=r.F[j].replace(/\{(\w+)\}/g,(m,q)=>L[k]+rowOf[q]).replace(/\[(\w+)\]/g,(m,q)=>ref[q]);
+        const c=x.getCell(k+2);c.value={formula:f,result:res[RG[j]][r[0]]};c.numFmt=r[2]=='p'?'0.00%':'#,##0.00'});
+      if(r[4])x.font=bold});
+    s.addRow([]);
+    const ann=res[RG[idx[0]]].rec*4,ok=j=>j<2||ann<=4.8e6,last=L[idx.length-1];
+    const rk=s.addRow(['Total p/ ranking (inelegível = n/d)']),rn=rk.number;
+    idx.forEach((j,k)=>{const c=rk.getCell(k+2),t=`${L[k]}${rowOf.tot}`;c.value={formula:j>1?`IF(${L[k]}${rowOf.rec}*4>4800000,1E+99,${t})`:t,result:ok(j)?res[RG[j]].tot:1e99};c.numFmt='#,##0.00'});
+    let bj=-1;idx.forEach((j,k)=>{if(ok(j)&&(bj<0||res[RG[j]].tot<res[RG[idx[bj]]].tot))bj=k});
+    const w=s.addRow(['Regime mais vantajoso']);w.font=bold;
+    w.getCell(2).value={formula:`INDEX($B$1:$${last}$1,MATCH(MIN(B${rn}:${last}${rn}),B${rn}:${last}${rn},0))`,result:bj<0?'-':NAMES[idx[bj]]};
+    if(note)s.addRow([note]);
+    s.addRow([]);
+    const hh=s.addRow(['Alíquotas efetivas CBS / IBS aplicadas — ano '+anoLbl]);hh.font=bold;hh.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE7EAE3'}};
+    const rc=s.addRow(['CBS efetiva (nominal '+fp(I.cbs)+')']);
+    idx.forEach((j,k)=>{const c=rc.getCell(k+2);c.value=Q.cbsRed;c.numFmt='0.00%'});
+    const ri=s.addRow(['IBS nominal do ano ('+anoLbl+')']);
+    idx.forEach((j,k)=>{const c=ri.getCell(k+2);c.value=ibsInfo.nominalAno;c.numFmt='0.00%'});
+    const re=s.addRow(['IBS efetiva (com redutor CNAE)']);
+    idx.forEach((j,k)=>{const c=re.getCell(k+2);c.value=ibsInfo.efetiva;c.numFmt='0.00%'});
+    const rr=s.addRow(['Redutor setorial (CNAE)']);
+    idx.forEach((j,k)=>{const c=rr.getCell(k+2);c.value=cnaeReducao;c.numFmt='0.00%'});
+    s.views=[{state:'frozen',xSplit:1,ySplit:1}];
+  };
+
+  const ref=prem('Premissas',Q);calcSheet('Comparativo',[0,1,2,3],ref,R);
+  const ref2=prem('Premissas_Simples',Iv);
+  calcSheet('Simples_Puro_x_Hibrido',[3,2],ref2,T,S.fr?'Com Fator R: folha considerada; Fator R = '+fp(Iv._meta.ratio)+'. Vendas com ST sem parcela de ICMS no DAS.':'Sem Fator R: folha de pagamento desprezada. Vendas com ST sem parcela de ICMS no DAS.');
+  const g=wb.addWorksheet('Gráficos'),cur=tab,imgs=[];
+  showTab(0);['c1','c2','c3'].forEach(id=>imgs.push($('#'+id).toDataURL('image/png')));
+  showTab(1);['c4','c5'].forEach(id=>imgs.push($('#'+id).toDataURL('image/png')));
+  showTab(cur);
+  imgs.forEach((b,i)=>g.addImage(wb.addImage({base64:b,extension:'png'}),{tl:{col:0,row:i*22},ext:{width:700,height:320}}));
+  const buf=await wb.xlsx.writeBuffer();
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  a.download='comparativo-regimes-tributarios.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+resetAll();
+</script>
+</body>
+</html>
